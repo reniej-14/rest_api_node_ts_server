@@ -1,12 +1,17 @@
 import { Router } from "express"
-import { body } from 'express-validator'
-import { createProduct, getProducts } from "./handlers/product"
+import { body, param } from 'express-validator'
+import { createProduct, deleteProduct, getProductById, getProducts, updateAvailability, updateProduct } from "./handlers/product"
 import { handleInputErrors } from "./middleware"
 
 const router = Router()
 
 // Routing
 router.get('/', getProducts)
+router.get('/:id', 
+    param('id').isInt().withMessage('ID no valido'),
+    handleInputErrors,
+    getProductById
+)
 
 router.post('/', 
     // Validación
@@ -20,16 +25,18 @@ router.post('/',
     createProduct
 )
 
-router.put('/', (req, res) => {
-    res.json('Desde put')
-})
+router.put('/:id', updateProduct)
 
-router.patch('/', (req, res) => {
-    res.json('Desde patch')
-})
+router.patch('/:id', 
+    param('id').isInt().withMessage('ID no valido'),
+    handleInputErrors,
+    updateAvailability
+)
 
-router.delete('/', (req, res) => {
-    res.json('Desde delete')
-})
+router.delete('/:id', 
+    param('id').isInt().withMessage('ID no valido'),
+    handleInputErrors,
+    deleteProduct
+)
 
 export default router
