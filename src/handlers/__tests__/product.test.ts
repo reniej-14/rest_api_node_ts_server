@@ -101,3 +101,86 @@ describe('GET /api/products/:id', () => {
         expect(response.body).toHaveProperty('data')
     })
 })
+
+describe('PUT /api/products/:id', () => {
+    test('Shoult check a valid ID in URL', async () => {
+        const response = await (await request(server).put('/api/products/not-valid-url').send({
+            name: "Monitor curvo",
+            availability: true,
+            price: 300
+        }))
+
+        expect(response.status).toBe(400)
+        expect(response.body).toHaveProperty('errors')
+        expect(response.body.errors).toHaveLength(2)
+    })
+
+    test('Sould display validation error messager when updating a product', async () => {
+        const response = await request(server).put('/api/products/1').send({})
+
+        expect(response.status).toBe(400)
+        expect(response.body).toHaveProperty('errors')
+        expect(response.body.errors).toHaveLength(5)
+
+        expect(response.status).not.toBe(200)
+        expect(response.body).not.toHaveProperty('data')
+    })
+
+    test('Sould validate that the price is greater than 0', async () => {
+        const response = await request(server).put('/api/products/1').send({
+            name: "Monitor curvo",
+            availability: true,
+            price: 0
+        })
+
+        expect(response.status).toBe(400)
+        expect(response.body).toHaveProperty('errors')
+        expect(response.body.errors).toHaveLength(1)
+
+        expect(response.status).not.toBe(200)
+        expect(response.body).not.toHaveProperty('data')
+    })
+
+    /* test('should update an existing product with valid data', async () => {
+        const response = (await request(server).put('/api/products/1').send({
+            name: "Monitor curvo",
+            availability: true,
+            price: 300
+        }))
+
+        expect(response.status).toBe(200)
+        expect(response.body).toHaveProperty('data')
+
+        expect(response.status).not.toBe(400)
+        expect(response.body).not.toHaveProperty('errors')
+    }) */
+})
+
+describe('DELETE /api/products/:id', () => {
+    test('should check a valid ID', async () => {
+        const response = await request(server).delete('/api/products/not-valid')
+
+        expect(response.status).toBe(400)
+        expect(response.body).toHaveProperty('errors')
+    })
+
+    test('should return a 404 response for a non-existent product', async () => {
+        const productId = 2000
+        const response = await request(server).delete(`/api/products/${productId}`)
+
+        expect(response.status).toBe(404)
+        expect(response.body).toHaveProperty('error')
+
+        expect(response.status).not.toBe(200)
+    })
+
+    test('shoul delete a product', async () => {
+        const response = await request(server).delete('/api/products/1')
+
+        expect(response.status).toBe(200)
+        expect(response.body).toHaveProperty('data')
+
+        expect(response.status).not.toBe(404)
+        expect(response.status).not.toBe(400)
+    })
+})
